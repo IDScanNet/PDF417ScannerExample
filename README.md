@@ -41,7 +41,10 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     switch(resultCode) {
       case PDF417ScanActivity.RESULT_OK:
         if(data != null) {
-          // TODO: Handle the data.
+            PDF417Result result = data.getParcelableExtra(PDF417ScanActivity.BARCODE_RAW_DATA)
+            if(result != null) {
+                // TODO: Handle the data.
+            }
         }
         break;
 
@@ -111,10 +114,32 @@ You can setup camera settings by overriding ```customizeCamera(Camera camera, in
 
 #### Handle scanned data
 
-By default, when barcode is recognized it returns via ```onActivityResult``` method. But you can change this behavior by overriding ```onData(String result)``` method. That is default implementation of this method:
+By default, when barcode is recognized it returns via ```onActivityResult``` method. But you can change this behavior by overriding ```onData(PDF417Result result)``` method. That is default implementation of this method:
 ```
-protected void onData(String result) {
+protected void onData(@NonNull PDF417Result result) {
   finish(result);
 }
 ```
-But you can process scanned data in a different way. For example, you can display barcode on **Viewfiender** layer. Also you don't have to return the result immediately. Instead of, you can return scanned data at any time in future by calling ```void finish(String result)``` method.
+But you can process scanned data in a different way. For example, you can display barcode on **Viewfiender** layer. Also you don't have to return the result immediately. Instead of, you can return scanned data at any time in future by calling ```void finish(PDF417Result result)``` method.
+
+#### Flashlight
+
+Since v2.0.6 version, you have two ways to control flashlight:
+
+1. You can call scanning activity with ```EXTRA_FLASH_STATE``` parameter with ```true``` value and if flashlight is available it will be turned on.
+```
+Intent i = new Intent(MainActivity.this, PDF417ScanActivity.class);
+i.putExtra(PDF417ScanActivity.EXTRA_LICENSE_KEY, LIC_KEY);
+i.putExtra(PDF417ScanActivity.EXTRA_FLASH_STATE, true);
+startActivityForResult(i, SCAN_ACTIVITY_CODE);
+```
+2. You can change state of the flashlight by calling ```setFlashState(booelan state)```.
+```
+public class CustomScanActivity extends PDF417ScanActivity {
+    ...
+    void switchFlashlight() {
+        setFlashState(!getFlashState());
+    }
+    ...
+}
+```

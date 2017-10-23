@@ -21,12 +21,15 @@ package net.idscan.android.pdf417scannerexample;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.hardware.Camera;
+import android.support.annotation.NonNull;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import net.idscan.android.components.camerareader.ICameraCustomizer;
+import net.idscan.android.pdf417scanner.PDF417Result;
 import net.idscan.android.pdf417scanner.PDF417ScanActivity;
 
 public class CustomScanActivity extends PDF417ScanActivity {
@@ -34,7 +37,7 @@ public class CustomScanActivity extends PDF417ScanActivity {
 
     private int _number_of_cameras = 0;
     private int _current_camera = 0;
-    private String _data = "";
+    private PDF417Result _data;
 
     private Button _btn_confirm;
     private TextView _tv_scanned_data;
@@ -98,13 +101,22 @@ public class CustomScanActivity extends PDF417ScanActivity {
             }
         });
 
+        v.findViewById(R.id.btn_flash).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                setFlashState(!getFlashState());
+            }
+        });
+
         return v;
     }
 
     @Override
-    protected void onData(String result) {
+    protected void onData(@NonNull PDF417Result result) {
         _data = result;
-        _tv_scanned_data.setText(_data);
+        _tv_scanned_data.setText(new String(_data.data));
         _btn_confirm.setVisibility(View.VISIBLE);
     }
 }

@@ -25,6 +25,7 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.TextView;
 
+import net.idscan.android.pdf417scanner.PDF417Result;
 import net.idscan.android.pdf417scanner.PDF417ScanActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent i = new Intent(MainActivity.this, PDF417ScanActivity.class);
                 i.putExtra(PDF417ScanActivity.EXTRA_LICENSE_KEY, LIC_KEY);
+                //i.putExtra(PDF417ScanActivity.EXTRA_FLASH_STATE, true);
                 startActivityForResult(i, SCAN_ACTIVITY_CODE);
             }
         });
@@ -68,8 +70,12 @@ public class MainActivity extends AppCompatActivity {
 
             switch (resultCode) {
                 case PDF417ScanActivity.RESULT_OK:
-                    if (data != null)
-                        tv_result.setText(data.getStringExtra(PDF417ScanActivity.BARCODE_DATA));
+                    if(data != null) {
+                        PDF417Result result = data.getParcelableExtra(PDF417ScanActivity.BARCODE_RAW_DATA);
+                        if(result != null)
+                            tv_result.setText(new String(result.data));
+                    }
+
                     break;
 
                 case PDF417ScanActivity.ERROR_INVALID_CAMERA_NUMBER:
@@ -86,6 +92,9 @@ public class MainActivity extends AppCompatActivity {
 
                 case PDF417ScanActivity.ERROR_INVALID_LICENSE_KEY:
                     tv_result.setText("Invalid license key.");
+                    break;
+
+                case PDF417ScanActivity.RESULT_CANCELED:
                     break;
 
                 default:

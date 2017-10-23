@@ -19,15 +19,14 @@
 package net.idscan.android.pdf417scannerexample;
 
 import android.graphics.ImageFormat;
-import android.graphics.Rect;
 import android.hardware.Camera;
 import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
 
-import net.idscan.android.pdf417scanner.PDF417ScanActivity;
+import net.idscan.android.components.camerareader.CameraSettings;
+import net.idscan.android.components.camerareader.ICameraCustomizer;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -35,7 +34,7 @@ import java.util.List;
 /**
  * Camera customizer example.
  */
-class CameraCustomizer implements PDF417ScanActivity.ICameraCustomizer {
+class CameraCustomizer implements ICameraCustomizer {
     /**
      * Display parameters.
      */
