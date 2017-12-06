@@ -2,7 +2,7 @@
 
 ## Setup
 
-1. Select your project in the project view and select **New->Module**.
+1. Select your project in the project view and choose **New->Module**.
 
 2. Choose **Import .JAR/.AAR Package** option:
 ![Import .JAR/.AAR](/images/import_module_1.png)
@@ -28,9 +28,9 @@ Intent i = new Intent(MainActivity.this, PDF417ScanActivity.class);
 i.putExtra(PDF417ScanActivity.EXTRA_LICENSE_KEY, "** LICENSE KEY **");
 startActivityForResult(i, SCAN_ACTIVITY_CODE);
 ```
-**Note** you need to replace ```** LICENSE KEY **``` by your **License Key**.
+**Note** need to replace ```** LICENSE KEY **``` by your **License Key**.
 
-To process scanning result you need to override ```onActivityResult()``` of your Activity.
+To process the result you need to override ```onActivityResult()``` of your Activity.
 
 ```
 @Override
@@ -65,20 +65,20 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
 * ```ERROR_INVALID_CAMERA_NUMBER``` invalid camera number is selected.
 
-* ```ERROR_INVALID_CAMERA_ACCESS``` application cannot access the camera. For example, camera can be captured by the other application or application has no permissions to use the camera.
+* ```ERROR_INVALID_CAMERA_ACCESS``` application cannot access the camera. For example, camera can be captured by the other application or application has no permission to use the camera.
 
 * ```ERROR_INVALID_LICENSE_KEY``` **License Key** invalid or expired.
 
 ## Customization
 
-For customization scanning activity you need to extend PDF417ScanActivity and override some methods.
+For customization **scanning activity** you need to extend PDF417ScanActivity and override some methods.
 
 #### Custom Viewfinder
 
-The scanning activity has the next structure:
+The **scanning activity** has the following structure:
 ![Import .JAR/.AAR](/images/scan_view_structure.png)
 
-By default, **Viewfinder** layer is a simple view with a frame. But you can replace it with a custom view. For that you need to override ```getViewFinder(LayoutInflater inflater)``` method. Also, you are free to adding any views to **Viewfinder** layer.
+By default, **Viewfinder** layer is a simple view with a frame. You can replace it with a custom view. For that you need to override ```getViewFinder(LayoutInflater inflater)``` method. Also, you can add any views to **Viewfinder** layer.
 ```
 @Override
 protected View getViewFinder(LayoutInflater inflater) {
@@ -94,9 +94,9 @@ protected View getViewFinder(LayoutInflater inflater) {
 
 #### Select camera
 
-You have two ways to select active camera in the scanning activity:
+You have two ways to select active camera in the **scanning activity**:
 
-1. You can override ```selectCamera(int number_of_cameras)``` method and return number of desired camera.
+1. You can override ```selectCamera(int number_of_cameras)``` method and return the number of desired camera.
 ```
 @Override
 protected int selectCamera(int number_of_cameras) {
@@ -107,7 +107,7 @@ protected int selectCamera(int number_of_cameras) {
 
 #### Setup camera
 
-You can setup camera settings by overriding ```customizeCamera(Camera camera, int camera_id)``` method. This method gets selected camera as input parameter and returns an implementation of ```ICameraCustomizer``` interface. This method is called every time when activity is recreated or current is camera changed.
+You can setup camera settings by overriding ```customizeCamera(Camera camera, int camera_id)``` method. This method gets selected camera as input parameter and returns an implementation of ```ICameraCustomizer``` interface. This method is invoked every time when activity is recreated or current camera is changed.
 
 ```onCameraSetup(Camera camera, int hformat, int hwidth, int hheight, CameraSettings settings)``` method of ```ICameraCustomizer``` interface is called every time when preview layout is changed. You can find reference implementation of ```ICameraCustomizer``` at ```CameraCustomizer.java```.
 
@@ -126,7 +126,7 @@ But you can process scanned data in a different way. For example, you can displa
 
 Since v2.0.6 version, you have two ways to control flashlight:
 
-1. You can call scanning activity with ```EXTRA_FLASH_STATE``` parameter with ```true``` value and if flashlight is available it will be turned on.
+1. You can call **scanning activity** with ```EXTRA_FLASH_STATE``` parameter with ```true``` value and if flashlight is available it will be turned on.
 ```
 Intent i = new Intent(MainActivity.this, PDF417ScanActivity.class);
 i.putExtra(PDF417ScanActivity.EXTRA_LICENSE_KEY, LIC_KEY);
