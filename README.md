@@ -109,7 +109,7 @@ protected int selectCamera(int number_of_cameras) {
 
 You can setup camera settings by overriding ```customizeCamera(Camera camera, int camera_id)``` method. This method gets selected camera as input parameter and returns an implementation of ```ICameraCustomizer``` interface. This method is invoked every time when activity is recreated or current camera is changed.
 
-```onCameraSetup(Camera camera, int hformat, int hwidth, int hheight, CameraSettings settings)``` method of ```ICameraCustomizer``` interface is called every time when preview layout is changed. You can find reference implementation of ```ICameraCustomizer``` at ```CameraCustomizer.java```.
+```onCameraSetup(Camera camera, int hformat, int hwidth, int hheight, CameraSettings settings)``` method of ```ICameraCustomizer``` interface is invoked every time when preview layout is changed. You can find reference implementation of ```ICameraCustomizer``` at ```CameraCustomizer.java```.
 
 
 #### Handle scanned data
