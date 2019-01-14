@@ -41,7 +41,7 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     switch(resultCode) {
       case PDF417ScanActivity.RESULT_OK:
         if(data != null) {
-            PDF417Result result = data.getParcelableExtra(PDF417ScanActivity.BARCODE_RAW_DATA)
+            PDF417Result result = data.getParcelableExtra(PDF417ScanActivity.BARCODE_RAW_DATA);
             if(result != null) {
                 // TODO: Handle the data.
             }
