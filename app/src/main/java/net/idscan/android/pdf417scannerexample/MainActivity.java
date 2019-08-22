@@ -18,8 +18,13 @@
 
 package net.idscan.android.pdf417scannerexample;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
@@ -30,35 +35,52 @@ import net.idscan.android.pdf417scanner.PDF417ScanActivity;
 
 public class MainActivity extends AppCompatActivity {
     private final static int SCAN_ACTIVITY_CODE = 0x001;
-    private final static String LIC_KEY = "xGEz0VTiEFVVESdoPMMDjeu6j7QwmJZpj6WjHBw2SDCKwzsv7fCbY0E+7w81VuhHHhAB3RESxiUCzF9c/uAK/PBPQMUxZiYGyZKI9A76hhlytAJCc0uTyGHhPQAXaO2mZK+wJzIsOm5hVTmAyYnYsbxOl2giQDBV9iyGR/mP/m8=";
+
+    private final static int REQUEST_CAMERA_PERMISSIONS_DEFAULT = 0x100;
+    private final static int REQUEST_CAMERA_PERMISSIONS_CUSTOM = 0x101;
+
+    private final static String LIC_KEY = "nQW+Ii0pb4WrM7VD53OcgWLguQ1P54ZaDvWCJfWtiqV4lL3SzJG+EoCnzusCVUg7BH2+FlxsqtAOusxoyTf1GH5ozItUdGdV2QexEWAGkjv5XXf0ftcZVvaq2oeHy7pg55BfkC2I/ShXyZtsFgAlbRi4J9p7Soip8jTCitpu+gA=";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ((TextView)findViewById(R.id.tv_result)).setMovementMethod(new ScrollingMovementMethod());
+        ((TextView) findViewById(R.id.tv_result)).setMovementMethod(new ScrollingMovementMethod());
 
-        ((TextView)findViewById(R.id.tv_version)).setText("Version: " +
+        ((TextView) findViewById(R.id.tv_version)).setText("Version: " +
                 net.idscan.android.pdf417scanner.Version.getVersion());
 
         findViewById(R.id.btn_scan).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(MainActivity.this, PDF417ScanActivity.class);
-                i.putExtra(PDF417ScanActivity.EXTRA_LICENSE_KEY, LIC_KEY);
-                //i.putExtra(PDF417ScanActivity.EXTRA_FLASH_STATE, true);
-                startActivityForResult(i, SCAN_ACTIVITY_CODE);
+                showDefaultScanView();
             }
         });
 
         findViewById(R.id.btn_scan_custom).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(MainActivity.this, CustomScanActivity.class);
-                i.putExtra(PDF417ScanActivity.EXTRA_LICENSE_KEY, LIC_KEY);
-                startActivityForResult(i, SCAN_ACTIVITY_CODE);
+                showCustomScanView();
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case REQUEST_CAMERA_PERMISSIONS_DEFAULT:
+                if (checkCameraPermissions()) {
+                    showDefaultScanView();
+                }
+                break;
+
+            case REQUEST_CAMERA_PERMISSIONS_CUSTOM:
+                if (checkCameraPermissions()) {
+                    showCustomScanView();
+                }
+                break;
+        }
     }
 
     @Override
@@ -66,13 +88,13 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == SCAN_ACTIVITY_CODE) {
-            TextView tv_result = (TextView) findViewById(R.id.tv_result);
+            TextView tv_result = findViewById(R.id.tv_result);
 
             switch (resultCode) {
                 case PDF417ScanActivity.RESULT_OK:
-                    if(data != null) {
+                    if (data != null) {
                         PDF417Result result = data.getParcelableExtra(PDF417ScanActivity.BARCODE_RAW_DATA);
-                        if(result != null)
+                        if (result != null)
                             tv_result.setText(new String(result.data));
                     }
 
@@ -102,5 +124,37 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
         }
+    }
+
+    private void showDefaultScanView() {
+        if (checkCameraPermissions()) {
+            Intent i = new Intent(MainActivity.this, PDF417ScanActivity.class);
+            i.putExtra(PDF417ScanActivity.EXTRA_LICENSE_KEY, LIC_KEY);
+            startActivityForResult(i, SCAN_ACTIVITY_CODE);
+        } else {
+            requestCameraPermissions(REQUEST_CAMERA_PERMISSIONS_DEFAULT);
+        }
+    }
+
+    private void showCustomScanView() {
+        if (checkCameraPermissions()) {
+            Intent i = new Intent(MainActivity.this, CustomScanActivity.class);
+            i.putExtra(PDF417ScanActivity.EXTRA_LICENSE_KEY, LIC_KEY);
+            startActivityForResult(i, SCAN_ACTIVITY_CODE);
+        } else {
+            requestCameraPermissions(REQUEST_CAMERA_PERMISSIONS_CUSTOM);
+        }
+    }
+
+    private boolean checkCameraPermissions() {
+        int status = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+        return (status == PackageManager.PERMISSION_GRANTED);
+    }
+
+    private void requestCameraPermissions(int requestCode) {
+        ActivityCompat.requestPermissions(
+                this,
+                new String[]{Manifest.permission.CAMERA},
+                requestCode);
     }
 }
