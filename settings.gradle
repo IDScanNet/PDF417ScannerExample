@@ -16,4 +16,4 @@
  * Support: support@idscan.net
  */
 
-include ':app', ':PDF417Scanner'
+include ':app'

@@ -24,11 +24,9 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
 
-import net.idscan.android.components.camerareader.CameraSettings;
-import net.idscan.android.components.camerareader.ICameraCustomizer;
+import net.idscan.components.android.camerareader.CameraSettings;
+import net.idscan.components.android.camerareader.ICameraCustomizer;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -47,7 +45,7 @@ class CameraCustomizer implements ICameraCustomizer {
     /**
      * Constructor.
      */
-    public CameraCustomizer(Display display, Camera.CameraInfo info) {
+    CameraCustomizer(Display display, Camera.CameraInfo info) {
         if (display == null)
             throw new NullPointerException("Parameter 'display' should not be null.");
         if (info == null)
@@ -59,28 +57,50 @@ class CameraCustomizer implements ICameraCustomizer {
 
     @Override
     public void onCameraSetup(Camera camera, int format, int width, int height, CameraSettings settings) {
-        // Gets preview size.
+        //calculate camera rotation.
+        int rotate = getCameraOrientation(_info, _display);
+
+        // Set camera orientation.
+        try {
+            camera.setDisplayOrientation(rotate);
+            if (settings != null) {
+                settings.orientation = rotate;
+            }
+        } catch (Exception ex) {
+            Log.e(CameraCustomizer.class.getName(), "Can't setup camera display orientation.");
+            ex.printStackTrace();
+        }
+
+        // Get preview size.
         Camera.Parameters params = camera.getParameters();
         List<Camera.Size> preview_sizes = params.getSupportedPreviewSizes();
-        Collections.sort(preview_sizes, new Comparator<Camera.Size>() {
-            @Override
-            public int compare(Camera.Size lhs, Camera.Size rhs) {
-                return rhs.width - lhs.width;
-            }
-        });
 
-        // Select best preview size.
-        float best_aspect = (width > height) ? (float) width / (float) height : (float) height / (float) width;
+        // Select best preview aspect.
+        float bestAspect;
+        if (rotate == 0 || rotate == 180) {
+            bestAspect = (float) width / (float) height;
+        } else {
+            bestAspect = (float) height / (float) width;
+        }
+        Log.d(CameraCustomizer.class.getName(),
+                String.format("Orientation: %d, Aspect: %f", rotate, bestAspect));
+
+        // Select preview size.
+        float bestScore = 0;
         Camera.Size best_preview_size = preview_sizes.get(0);
         for (Camera.Size s : preview_sizes) {
-            if (s.width < best_preview_size.width)
-                break;
+            float aspect = (float) s.width / (float) s.height;
+            float aspectMiss = Math.abs(aspect - bestAspect) / Math.max(aspect, bestAspect);
+            float size = (float) Math.sqrt(s.width * s.width + s.height * s.height);
+            float score = (1.0f - aspectMiss) * size;
 
-            float ba = (float) best_preview_size.width / (float) best_preview_size.height;
-            float sa = (float) s.width / (float) s.height;
+            Log.d(CameraCustomizer.class.getName(),
+                    String.format("Preview score: [%d x %d] : %f", s.width, s.height, score));
 
-            if (Math.abs(best_aspect - ba) > Math.abs(best_aspect - sa))
+            if (score > bestScore) {
                 best_preview_size = s;
+                bestScore = score;
+            }
         }
 
         // Set preview parameters.
@@ -88,40 +108,42 @@ class CameraCustomizer implements ICameraCustomizer {
             params.setPreviewFormat(ImageFormat.NV21);
             params.setPreviewSize(best_preview_size.width, best_preview_size.height);
             camera.setParameters(params);
+            Log.d(CameraCustomizer.class.getName(),
+                    String.format("Best preview: %d x %d", best_preview_size.width, best_preview_size.height));
         } catch (Exception ex) {
             Log.e(CameraCustomizer.class.getName(), "Can't setup preview size.");
             ex.printStackTrace();
         }
 
-        // Get all available picture sizes.
+        // Gets all available picture sizes.
         params = camera.getParameters();
         best_preview_size = params.getPreviewSize();
         List<Camera.Size> picture_sizes = params.getSupportedPictureSizes();
-        Collections.sort(picture_sizes, new Comparator<Camera.Size>() {
-            @Override
-            public int compare(Camera.Size lhs, Camera.Size rhs) {
-                return rhs.width - lhs.width;
-            }
-        });
 
         // Select best picture size.
-        best_aspect = (float) best_preview_size.width / (float) best_preview_size.height;
+        bestAspect = (float) best_preview_size.width / (float) best_preview_size.height;
         Camera.Size best_picture_size = picture_sizes.get(0);
         for (Camera.Size s : picture_sizes) {
-            float ba = (float) best_picture_size.width / (float) best_picture_size.height;
-            float sa = (float) s.width / (float) s.height;
+            float aspect = (float) s.width / (float) s.height;
+            float aspectMiss = Math.abs(aspect - bestAspect) / Math.max(aspect, bestAspect);
+            float size = (float) Math.sqrt(s.width * s.width + s.height * s.height);
+            float score = (1.0f - aspectMiss) * size;
 
-            if (Math.abs(best_aspect - ba) > Math.abs(best_aspect - sa))
+            Log.d(CameraCustomizer.class.getName(),
+                    String.format("Picture score: [%d x %d] : %f", s.width, s.height, score));
+
+            if (score > bestScore) {
                 best_picture_size = s;
+                bestScore = score;
+            }
         }
-
-        Log.d("Best preview size", String.format("%d x %d", best_preview_size.width, best_preview_size.height));
-        Log.d("Best picture size", String.format("%d x %d", best_picture_size.width, best_picture_size.height));
 
         // Set image parameters.
         try {
             params.setPictureSize(best_picture_size.width, best_picture_size.height);
             camera.setParameters(params);
+            Log.d(CameraCustomizer.class.getName(),
+                    String.format("Best image: %d x %d", best_picture_size.width, best_picture_size.height));
         } catch (Exception ex) {
             Log.e(CameraCustomizer.class.getName(), "Can't setup picture size.");
             ex.printStackTrace();
@@ -143,10 +165,12 @@ class CameraCustomizer implements ICameraCustomizer {
                 }
             }
         }
+    }
 
+    private static int getCameraOrientation(Camera.CameraInfo cameraInfo, Display display) {
         //calculate camera rotation.
         int degrees = 0;
-        switch (_display.getRotation()) {
+        switch (display.getRotation()) {
             case Surface.ROTATION_0:
                 degrees = 0;
                 break; //Natural orientation
@@ -161,21 +185,13 @@ class CameraCustomizer implements ICameraCustomizer {
                 break; //Landscape right
         }
         int rotate;
-        if (_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            rotate = (_info.orientation + degrees) % 360;
+        if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            rotate = (cameraInfo.orientation + degrees) % 360;
             rotate = (360 - rotate) % 360;
-        } else
-            rotate = (_info.orientation - degrees + 360) % 360;
-
-        if (settings != null)
-            settings.orientation = rotate;
-
-        // Set camera orientation.
-        try {
-            camera.setDisplayOrientation(rotate);
-        } catch (Exception ex) {
-            Log.e(CameraCustomizer.class.getName(), "Can't setup display orientation.");
-            ex.printStackTrace();
+        } else {
+            rotate = (cameraInfo.orientation - degrees + 360) % 360;
         }
+
+        return rotate;
     }
 }

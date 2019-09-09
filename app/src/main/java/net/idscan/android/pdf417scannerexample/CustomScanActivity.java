@@ -25,19 +25,20 @@ import android.support.annotation.NonNull;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import net.idscan.android.components.camerareader.ICameraCustomizer;
-import net.idscan.android.pdf417scanner.PDF417Result;
-import net.idscan.android.pdf417scanner.PDF417ScanActivity;
+import net.idscan.components.android.camerareader.ICameraCustomizer;
+import net.idscan.components.android.scanpdf417.PDF417ScanActivity;
 
 public class CustomScanActivity extends PDF417ScanActivity {
     private static final String _PREFS_NAME = "CustomScanActivitySettings";
 
     private int _number_of_cameras = 0;
     private int _current_camera = 0;
-    private PDF417Result _data;
+    private PDF417Data _data;
 
     private Button _btn_confirm;
     private TextView _tv_scanned_data;
@@ -73,6 +74,15 @@ public class CustomScanActivity extends PDF417ScanActivity {
     protected View getViewFinder(LayoutInflater inflater) {
         View v = inflater.inflate(R.layout.custom_viewfinder, null);
 
+        View old_vf = super.getViewFinder(inflater);
+        if (old_vf != null) {
+            FrameLayout old_vf_layout = v.findViewById(R.id.old_vf);
+            ViewGroup.LayoutParams p = new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+            old_vf_layout.addView(old_vf, p);
+        }
+
         _tv_scanned_data = v.findViewById(R.id.tv_scanned_data);
 
         _btn_confirm = v.findViewById(R.id.btn_confirm);
@@ -92,7 +102,7 @@ public class CustomScanActivity extends PDF417ScanActivity {
                 if (_current_camera >= _number_of_cameras)
                     _current_camera = 0;
 
-                if(setCamera(_current_camera)) {
+                if (setCamera(_current_camera)) {
                     // Save the last selected camera.
                     getSharedPreferences(_PREFS_NAME, Context.MODE_PRIVATE).edit()
                             .putInt("camera", _current_camera)
@@ -101,11 +111,9 @@ public class CustomScanActivity extends PDF417ScanActivity {
             }
         });
 
-        v.findViewById(R.id.btn_flash).setOnClickListener(new View.OnClickListener()
-        {
+        v.findViewById(R.id.btn_flash).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
                 setFlashState(!getFlashState());
             }
         });
@@ -114,9 +122,9 @@ public class CustomScanActivity extends PDF417ScanActivity {
     }
 
     @Override
-    protected void onData(@NonNull PDF417Result result) {
+    protected void onData(@NonNull PDF417Data result) {
         _data = result;
-        _tv_scanned_data.setText(new String(_data.data));
+        _tv_scanned_data.setText(new String(_data.barcodeData));
         _btn_confirm.setVisibility(View.VISIBLE);
     }
 }

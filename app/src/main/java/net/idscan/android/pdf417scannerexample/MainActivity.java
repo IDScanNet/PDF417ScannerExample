@@ -30,8 +30,8 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.TextView;
 
-import net.idscan.android.pdf417scanner.PDF417Result;
-import net.idscan.android.pdf417scanner.PDF417ScanActivity;
+import net.idscan.components.android.scanpdf417.PDF417ScanActivity;
+import net.idscan.components.android.scanpdf417.PDF417ScanActivity.PDF417Data;
 
 public class MainActivity extends AppCompatActivity {
     private final static int SCAN_ACTIVITY_CODE = 0x001;
@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.tv_result)).setMovementMethod(new ScrollingMovementMethod());
 
         ((TextView) findViewById(R.id.tv_version)).setText("Version: " +
-                net.idscan.android.pdf417scanner.Version.getVersion());
+                net.idscan.components.android.scanpdf417.Version.getVersion());
 
         findViewById(R.id.btn_scan).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,9 +93,10 @@ public class MainActivity extends AppCompatActivity {
             switch (resultCode) {
                 case PDF417ScanActivity.RESULT_OK:
                     if (data != null) {
-                        PDF417Result result = data.getParcelableExtra(PDF417ScanActivity.BARCODE_RAW_DATA);
-                        if (result != null)
-                            tv_result.setText(new String(result.data));
+                        PDF417Data result = data.getParcelableExtra(PDF417ScanActivity.DOCUMENT_DATA);
+                        if (result != null) {
+                            tv_result.setText(new String(result.barcodeData));
+                        }
                     }
 
                     break;
@@ -112,8 +113,8 @@ public class MainActivity extends AppCompatActivity {
                     tv_result.setText("Invalid camera access.");
                     break;
 
-                case PDF417ScanActivity.ERROR_INVALID_LICENSE_KEY:
-                    tv_result.setText("Invalid license key.");
+                case PDF417ScanActivity.ERROR_RECOGNITION:
+                    tv_result.setText(data.getStringExtra(PDF417ScanActivity.ERROR_DESCRIPTION));
                     break;
 
                 case PDF417ScanActivity.RESULT_CANCELED:
