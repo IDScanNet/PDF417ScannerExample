@@ -12,7 +12,8 @@ allprojects {
         }
         ...
     }
-}```
+}
+```
 2. Add the following to the **module** ```build.gradle``` file:
 ```
 dependencies {
