@@ -20,9 +20,7 @@ package net.idscan.android.pdf417scannerexample;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.hardware.Camera;
 import android.support.annotation.NonNull;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +28,6 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import net.idscan.components.android.camerareader.ICameraCustomizer;
 import net.idscan.components.android.scanpdf417.PDF417ScanActivity;
 
 public class CustomScanActivity extends PDF417ScanActivity {
@@ -59,15 +56,6 @@ public class CustomScanActivity extends PDF417ScanActivity {
         }
 
         return _current_camera;
-    }
-
-    @Override
-    protected ICameraCustomizer customizeCamera(Camera camera, int i) {
-        //Custom variant.
-        Display display_info = getWindowManager().getDefaultDisplay();
-        Camera.CameraInfo camera_info = new Camera.CameraInfo();
-        Camera.getCameraInfo(i, camera_info);
-        return new CameraCustomizer(display_info, camera_info);
     }
 
     @Override

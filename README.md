@@ -118,7 +118,7 @@ protected int selectCamera(int number_of_cameras) {
 ```
 2. You can call ```setCamera(int id)``` method to change the current active camera.
 
-#### Setup camera
+#### Setup camera (Removed in v4.0.0)
 
 You can setup camera settings by overriding ```customizeCamera(Camera camera, int camera_id)``` method. This method gets selected camera as input parameter and returns an implementation of ```ICameraCustomizer``` interface. This method is invoked every time when activity is recreated or current camera is changed.
 
