@@ -18,7 +18,7 @@ allprojects {
 ```
 dependencies {
     ...
-    implementation 'net.idscan.components.android:scanpdf417:3.0.0'
+    implementation 'net.idscan.components.android:scanpdf417:4.1.0'
     ...
 }
 ```
