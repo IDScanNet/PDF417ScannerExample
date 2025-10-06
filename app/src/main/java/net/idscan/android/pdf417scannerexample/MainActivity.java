@@ -22,13 +22,18 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import net.idscan.components.android.scanpdf417.PDF417ScanActivity;
 import net.idscan.components.android.scanpdf417.PDF417ScanActivity.PDF417Data;
@@ -39,12 +44,26 @@ public class MainActivity extends AppCompatActivity {
     private final static int REQUEST_CAMERA_PERMISSIONS_DEFAULT = 0x100;
     private final static int REQUEST_CAMERA_PERMISSIONS_CUSTOM = 0x101;
 
-    private final static String LIC_KEY = "nQW+Ii0pb4WrM7VD53OcgWLguQ1P54ZaDvWCJfWtiqV4lL3SzJG+EoCnzusCVUg7BH2+FlxsqtAOusxoyTf1GH5ozItUdGdV2QexEWAGkjv5XXf0ftcZVvaq2oeHy7pg55BfkC2I/ShXyZtsFgAlbRi4J9p7Soip8jTCitpu+gA=";
+    private final static String LIC_KEY = "yJeYeqHDzU1yKMw5wOWQ/7KOI8ubF2jWDpLfPUr0jKtu28UL2uzF18CrXdnKywyqATw/QfNBO5OOtX7uDIGTS3y8ha9GcsJtUvDP31e8M5gR34jfp76EujJtVDjYpFTSw5FlyXkNc3EFtKec4vMoT5rSmZJzx1vugTRuWNyfyXU=";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
+
+        ViewGroup content = findViewById(R.id.content);
+        ViewCompat.setOnApplyWindowInsetsListener(content, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            mlp.leftMargin = insets.left;
+            mlp.rightMargin = insets.right;
+            mlp.topMargin = insets.top;
+            mlp.bottomMargin = insets.bottom;
+            v.setLayoutParams(mlp);
+            return WindowInsetsCompat.CONSUMED;
+        });
+
         ((TextView) findViewById(R.id.tv_result)).setMovementMethod(new ScrollingMovementMethod());
 
         ((TextView) findViewById(R.id.tv_version)).setText("Version: " +
